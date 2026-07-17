@@ -1,0 +1,15 @@
+{
+	"name": "ADFForProjectFromAnil",
+	"properties": {
+		"trustModeClaimForMi": {
+			"value": "Disabled",
+			"editable": true
+		}
+	},
+	"location": "centralindia",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "d3c893df-2b3d-4a78-a67d-63af250aa00e",
+		"tenantId": "58868125-edcf-4aeb-ba1b-0f59dce55fbc"
+	}
+}
