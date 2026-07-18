@@ -1,0 +1,6 @@
+{
+	"name": "ForOnPrimServer",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}
