@@ -1,0 +1,12 @@
+{
+	"name": "IRForOnPrim",
+	"properties": {
+		"type": "SelfHosted",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/1c952c35-3101-4f33-89c0-fdc9fcca2f20/resourcegroups/DevelopmentResourceGroup/providers/Microsoft.DataFactory/factories/azuredatafactoryanil/integrationruntimes/SelfhostedIR",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}
