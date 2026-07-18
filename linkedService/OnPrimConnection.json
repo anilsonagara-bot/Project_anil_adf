@@ -1,0 +1,21 @@
+{
+	"name": "OnPrimConnection",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "SqlServer",
+		"typeProperties": {
+			"server": "DESKTOP-L7GD08G\\SQL2025",
+			"database": "TRIP_DB_ENGG_SRC",
+			"encrypt": "mandatory",
+			"trustServerCertificate": true,
+			"authenticationType": "SQL",
+			"userName": "adf_user",
+			"encryptedCredential": "eyJDcmVkZW50aWFsSWQiOiI3MTUzMzc4OS0yNTIxLTRhMGQtOGRmYi02ZTUwMzkwOTk3ODYiLCJWZXJzaW9uIjoiMi4wIiwiQ2xhc3NUeXBlIjoiTWljcm9zb2Z0LkRhdGFQcm94eS5Db3JlLkludGVyU2VydmljZURhdGFDb250cmFjdC5DcmVkZW50aWFsU1UwNkNZMTQifQ=="
+		},
+		"connectVia": {
+			"referenceName": "IRForOnPrim",
+			"type": "IntegrationRuntimeReference"
+		}
+	}
+}
