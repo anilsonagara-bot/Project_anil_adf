@@ -1,0 +1,12 @@
+{
+	"name": "Agg_TripVendor_ByVendorid",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "OnPrimConnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}

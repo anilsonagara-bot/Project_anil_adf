@@ -1,0 +1,36 @@
+{
+	"name": "Project_Aggregation",
+	"properties": {
+		"activities": [
+			{
+				"name": "Agg_TripVendor_ByVendorid",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT Vendor_id, COUNT(*) AS taxi_count\nFROM TripVendor\nGROUP BY Vendor_id",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "Agg_TripVendor_ByVendorid",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
