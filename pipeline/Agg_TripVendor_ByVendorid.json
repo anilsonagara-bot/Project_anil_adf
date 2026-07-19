@@ -37,7 +37,10 @@
 							"type": "DateTime"
 						},
 						"ErrorMessage": {
-							"value": "@activity('Agg_TripVendor_ByVendorid').error.message",
+							"value": {
+								"value": "''",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"PipelineName": {
