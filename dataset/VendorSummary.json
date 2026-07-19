@@ -1,0 +1,12 @@
+{
+	"name": "VendorSummary",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "OnPrimConnection",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}

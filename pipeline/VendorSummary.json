@@ -1,0 +1,71 @@
+{
+	"name": "VendorSummary",
+	"properties": {
+		"activities": [
+			{
+				"name": "VendorSummary",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT \n    v.medallion, v.Vendor_id, v.rate_code,\n    fd.total_fare, fd.trip_count,\n    td.total_distance, td.avg_distance,\n    p.total_paid\nFROM TripVendor v\nLEFT JOIN (\n    SELECT medallion, SUM(fare_amount) AS total_fare, COUNT(*) AS trip_count\n    FROM FareDetails GROUP BY medallion\n) fd ON v.medallion = fd.medallion\nLEFT JOIN (\n    SELECT medallion, SUM(trip_distance) AS total_distance, AVG(trip_distance) AS avg_distance\n    FROM TripDetails GROUP BY medallion\n) td ON v.medallion = td.medallion\nLEFT JOIN (\n    SELECT medallion, SUM(total_amount) AS total_paid\n    FROM Payment GROUP BY medallion\n) p ON v.medallion = p.medallion;\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"preCopyScript": "TRUNCATE TABLE [dbo].[VendorSummary]",
+						"writeBehavior": "Insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Info",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "Logging",
+								"type": "LinkedServiceReference"
+							},
+							"path": "aggregation/staging/VendorSummary"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "VendorSummary",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "VendorSummary1",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
