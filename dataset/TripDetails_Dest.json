@@ -1,0 +1,54 @@
+{
+	"name": "TripDetails_Dest",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DedicatedPoolForProject",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "id",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "medallion",
+				"type": "char"
+			},
+			{
+				"name": "passenger_count",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "trip_time_in_secs",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "trip_distance",
+				"type": "decimal",
+				"precision": 6,
+				"scale": 2
+			},
+			{
+				"name": "CreatedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "LastUpdated",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "TripDetails"
+		}
+	}
+}
