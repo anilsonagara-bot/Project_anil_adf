@@ -246,14 +246,15 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[usp_UpsertTripVendor]",
+					"storedProcedureName": "[dbo].[usp_UpdateWatermark]",
 					"storedProcedureParameters": {
 						"NewWatermark": {
-							"value": {
-								"value": "@activity('LookupNewWatermark').output.firstRow.NewWatermark",
-								"type": "Expression"
-							},
+							"value": "TripVendor",
 							"type": "DateTime"
+						},
+						"TableName": {
+							"value": "@activity('LookupNewWatermark').output.firstRow.NewWatermark",
+							"type": "String"
 						}
 					}
 				},
