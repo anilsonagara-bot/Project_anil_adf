@@ -80,7 +80,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT * FROM TripVendor\nWHERE LastUpdated > '@{activity('LookupOldWatermark').output.firstRow.LastLoadedValue}'\nAND LastUpdated <= '@{activity('LookupNewWatermark').output.firstRow.NewWatermark}'",
+						"sqlReaderQuery": {
+							"value": "SELECT * FROM TripLocation\nWHERE LastUpdated > '@{activity('LookupOldWatermark').output.firstRow.LastLoadedValue}'\nAND LastUpdated <= '@{activity('LookupNewWatermark').output.firstRow.NewWatermark}'",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -89,7 +92,7 @@
 						"writeBehavior": "Upsert",
 						"upsertSettings": {
 							"keys": [
-								"medallion"
+								"id"
 							],
 							"interimSchemaName": ""
 						},
@@ -102,7 +105,7 @@
 							"referenceName": "Staging",
 							"type": "LinkedServiceReference"
 						},
-						"path": "incrementalload/staging/TripVendor"
+						"path": "incrementalload/staging/TripLocation"
 					},
 					"logSettings": {
 						"enableCopyActivityLog": true,
@@ -115,7 +118,7 @@
 								"referenceName": "Logging",
 								"type": "LinkedServiceReference"
 							},
-							"path": "incrementalload/logging/TripVendor"
+							"path": "incrementalload/logging/TripLocation"
 						}
 					},
 					"translator": {
@@ -123,6 +126,18 @@
 						"mappings": [
 							{
 								"source": {
+									"name": "id",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
 									"name": "medallion",
 									"type": "String",
 									"physicalType": "char"
@@ -135,50 +150,66 @@
 							},
 							{
 								"source": {
-									"name": "hack_license",
-									"type": "String",
-									"physicalType": "char"
+									"name": "pickup_longitude",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 6,
+									"precision": 9
 								},
 								"sink": {
-									"name": "hack_license",
-									"type": "String",
-									"physicalType": "char"
+									"name": "pickup_longitude",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 6,
+									"precision": 9
 								}
 							},
 							{
 								"source": {
-									"name": "Vendor_id",
-									"type": "String",
-									"physicalType": "varchar"
+									"name": "pickup_latitude",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 6,
+									"precision": 8
 								},
 								"sink": {
-									"name": "Vendor_id",
-									"type": "String",
-									"physicalType": "varchar"
+									"name": "pickup_latitude",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 6,
+									"precision": 8
 								}
 							},
 							{
 								"source": {
-									"name": "rate_code",
-									"type": "Byte",
-									"physicalType": "tinyint"
+									"name": "dropoff_longitude",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 6,
+									"precision": 9
 								},
 								"sink": {
-									"name": "rate_code",
-									"type": "Byte",
-									"physicalType": "tinyint"
+									"name": "dropoff_longitude",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 6,
+									"precision": 9
 								}
 							},
 							{
 								"source": {
-									"name": "store_and_fwd_flag",
-									"type": "String",
-									"physicalType": "char"
+									"name": "dropoff_latitude",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 6,
+									"precision": 8
 								},
 								"sink": {
-									"name": "store_and_fwd_flag",
-									"type": "String",
-									"physicalType": "char"
+									"name": "dropoff_latitude",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 6,
+									"precision": 8
 								}
 							},
 							{
@@ -221,7 +252,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "TripVendor_dest",
+						"referenceName": "TripLocation_Dist",
 						"type": "DatasetReference"
 					}
 				]
