@@ -3,102 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Agg_TripVendor_ByVendorid",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "0.12:00:00",
-					"retry": 2,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT Vendor_id, COUNT(*) AS taxi_count\nFROM TripVendor\nGROUP BY Vendor_id",
-						"queryTimeout": "02:00:00",
-						"partitionOption": "None"
-					},
-					"sink": {
-						"type": "SqlDWSink",
-						"preCopyScript": "TRUNCATE TABLE [dbo].[Agg_TripVendor_ByVendorid]",
-						"writeBehavior": "Insert",
-						"sqlWriterUseTableLock": false,
-						"disableMetricsCollection": false
-					},
-					"enableStaging": true,
-					"stagingSettings": {
-						"linkedServiceName": {
-							"referenceName": "Staging",
-							"type": "LinkedServiceReference"
-						},
-						"path": "aggregation/staging/Agg_TripVendor_ByVendorid"
-					},
-					"logSettings": {
-						"enableCopyActivityLog": true,
-						"copyActivityLogSettings": {
-							"logLevel": "Info",
-							"enableReliableLogging": false
-						},
-						"logLocationSettings": {
-							"linkedServiceName": {
-								"referenceName": "Logging",
-								"type": "LinkedServiceReference"
-							},
-							"path": "aggregation/logging/Agg_TripVendor_ByVendorid"
-						}
-					},
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "Vendor_id",
-									"type": "String",
-									"physicalType": "varchar"
-								},
-								"sink": {
-									"name": "Vendor_id",
-									"type": "String",
-									"physicalType": "varchar"
-								}
-							},
-							{
-								"source": {
-									"name": "taxi_count",
-									"type": "Int32",
-									"physicalType": "int"
-								},
-								"sink": {
-									"name": "taxi_count",
-									"type": "Int32",
-									"physicalType": "int"
-								}
-							}
-						],
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "Agg_TripVendor_ByVendorid",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AzureSynapseAnalyticsTable1",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
 				"name": "Success",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
@@ -258,6 +162,102 @@
 					"referenceName": "DedicatedPoolForProject",
 					"type": "LinkedServiceReference"
 				}
+			},
+			{
+				"name": "Agg_TripVendor_ByVendorid",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT Vendor_id, COUNT(*) AS taxi_count\nFROM TripVendor\nGROUP BY Vendor_id",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"preCopyScript": "TRUNCATE TABLE [dbo].[Agg_TripVendor_ByVendorid]",
+						"writeBehavior": "Insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "Staging",
+							"type": "LinkedServiceReference"
+						},
+						"path": "aggregation/staging/Agg_TripVendor_ByVendorid"
+					},
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Info",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "Logging",
+								"type": "LinkedServiceReference"
+							},
+							"path": "aggregation/logging/Agg_TripVendor_ByVendorid"
+						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "Vendor_id",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "Vendor_id",
+									"type": "String",
+									"physicalType": "varchar"
+								}
+							},
+							{
+								"source": {
+									"name": "taxi_count",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "taxi_count",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Agg_TripVendor_ByVendorid",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AzureSynapseAnalyticsTable1",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"annotations": []
