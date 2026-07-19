@@ -1,0 +1,57 @@
+{
+	"name": "Agg_FareDetails",
+	"properties": {
+		"activities": [
+			{
+				"name": "Agg_FareDetails",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 2,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlServerSource",
+						"sqlReaderQuery": "SELECT \n    medallion,\n    COUNT(*) as [trip_count],\n    SUM(fare_amount)  as [total_fare],        \n    SUM(surcharge) as [total_surcharge],\n    SUM(mta_tax) as [total_mta_tax],\n    SUM(tip_amount) as [total_tips],\n    SUM(tolls_amount) as [total_tolls],\n    SUM(fare_amount + surcharge + mta_tax + tip_amount + tolls_amount) as [total_charged],\n    AVG(fare_amount) as [avg_fare_per_trip]  \nFROM FareDetails\nGROUP BY medallion;\n",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "SqlDWSink",
+						"preCopyScript": "TRUNCATE TABLE [dbo].[Agg_FareDetails]",
+						"writeBehavior": "Insert",
+						"sqlWriterUseTableLock": false,
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Agg_FareDetails",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AggFareDetails",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": []
+	}
+}
