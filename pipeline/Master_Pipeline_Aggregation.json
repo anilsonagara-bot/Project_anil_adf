@@ -164,8 +164,22 @@
 				}
 			},
 			{
-				"name": "Success",
-				"type": "SqlServerStoredProcedure",
+				"name": "MasterStartTime",
+				"type": "SetVariable",
+				"dependsOn": [],
+				"policy": {
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "MasterStartTime",
+					"value": "@utcnow()"
+				}
+			},
+			{
+				"name": "Send success email",
+				"type": "WebActivity",
 				"dependsOn": [
 					{
 						"activity": "VendorSummary",
@@ -183,74 +197,20 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
-					"storedProcedureParameters": {
-						"ActivityName": {
-							"value": "Master pipeline",
-							"type": "String"
-						},
-						"DestinationTable": {
-							"value": "NA",
-							"type": "String"
-						},
-						"EndTime": {
-							"value": "@utcnow()",
-							"type": "DateTime"
-						},
-						"ErrorMessage": {
-							"value": {
-								"value": "Master Pipeline successed",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipelineName": {
-							"value": {
-								"value": "@pipeline().Pipeline",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipelineRunId": {
-							"value": "@pipeline().RunId",
-							"type": "String"
-						},
-						"RowsCopied": {
-							"value": null,
-							"type": "Int32"
-						},
-						"RowsRead": {
-							"value": null,
-							"type": "Int32"
-						},
-						"SourceTable": {
-							"value": {
-								"value": "NA",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"StartTime": {
-							"value": {
-								"value": "@variables('MasterStartTime')",
-								"type": "Expression"
-							},
-							"type": "DateTime"
-						},
-						"Status": {
-							"value": "Succeeded",
-							"type": "String"
-						}
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"url": "https://prod-58.southeastasia.logic.azure.com:443/workflows/7380c3c9d70049538bd2502242fedf1a/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=5UuWTKgbAwnJBjsVZBTctt5SS7-I7ZYmjzRlU7XSW5U",
+					"body": {
+						"value": "{\n  \"pipelineName\": \"@{pipeline().Pipeline}\",\n  \"status\": \"Succeeded\",\n  \"runId\": \"@{pipeline().RunId}\",\n  \"message\": \"Master pipeline completed successfully.\"\n}",
+						"type": "Expression"
 					}
-				},
-				"linkedServiceName": {
-					"referenceName": "DedicatedPoolForProject",
-					"type": "LinkedServiceReference"
 				}
 			},
 			{
-				"name": "Fail",
-				"type": "SqlServerStoredProcedure",
+				"name": "Send failure email",
+				"type": "WebActivity",
 				"dependsOn": [
 					{
 						"activity": "VendorSummary",
@@ -268,80 +228,15 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
-					"storedProcedureParameters": {
-						"ActivityName": {
-							"value": "Master pipeline",
-							"type": "String"
-						},
-						"DestinationTable": {
-							"value": "NA",
-							"type": "String"
-						},
-						"EndTime": {
-							"value": "@utcnow()",
-							"type": "DateTime"
-						},
-						"ErrorMessage": {
-							"value": {
-								"value": "Master Pipeline Failed",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipelineName": {
-							"value": {
-								"value": "@pipeline().Pipeline",
-								"type": "Expression"
-							},
-							"type": "String"
-						},
-						"PipelineRunId": {
-							"value": "@pipeline().RunId",
-							"type": "String"
-						},
-						"RowsCopied": {
-							"value": null,
-							"type": "Int32"
-						},
-						"RowsRead": {
-							"value": null,
-							"type": "Int32"
-						},
-						"SourceTable": {
-							"value": "NA",
-							"type": "String"
-						},
-						"StartTime": {
-							"value": {
-								"value": "@variables('MasterStartTime')",
-								"type": "Expression"
-							},
-							"type": "DateTime"
-						},
-						"Status": {
-							"value": "Failed",
-							"type": "String"
-						}
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"url": "https://prod-58.southeastasia.logic.azure.com:443/workflows/7380c3c9d70049538bd2502242fedf1a/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=5UuWTKgbAwnJBjsVZBTctt5SS7-I7ZYmjzRlU7XSW5U",
+					"body": {
+						"value": "{\n  \"pipelineName\": \"@{pipeline().Pipeline}\",\n  \"status\": \"Failed\",\n  \"runId\": \"@{pipeline().RunId}\",\n  \"message\": \"@{coalesce(activity('Agg_TripVendor_ByVendorid').error.message, activity('Agg_FareDetails').error.message, 'Unknown error')}\"\n}",
+						"type": "Expression"
 					}
-				},
-				"linkedServiceName": {
-					"referenceName": "DedicatedPoolForProject",
-					"type": "LinkedServiceReference"
-				}
-			},
-			{
-				"name": "MasterStartTime",
-				"type": "SetVariable",
-				"dependsOn": [],
-				"policy": {
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "MasterStartTime",
-					"value": "@utcnow()"
 				}
 			}
 		],
