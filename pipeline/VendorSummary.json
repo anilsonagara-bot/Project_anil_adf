@@ -210,7 +210,7 @@
 							"type": "Int32"
 						},
 						"RowsRead": {
-							"value": "0",
+							"value": "@activity('VendorSummary').output.rowsRead",
 							"type": "Int32"
 						},
 						"SourceTable": {
