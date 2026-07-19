@@ -25,11 +25,11 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "'CopyToAggTripVendorBuVendor'",
+							"value": "CopyToAggTripVendorBuVendor",
 							"type": "String"
 						},
 						"DestinationTable": {
-							"value": "'Agg_TripVendor_ByVendorid'",
+							"value": "Agg_TripVendor_ByVendorid",
 							"type": "String"
 						},
 						"EndTime": {
@@ -37,7 +37,7 @@
 							"type": "DateTime"
 						},
 						"ErrorMessage": {
-							"value": "''",
+							"value": "@activity('Agg_TripVendor_ByVendorid').error.message",
 							"type": "String"
 						},
 						"PipelineName": {
@@ -66,7 +66,7 @@
 							"type": "Int32"
 						},
 						"SourceTable": {
-							"value": "'TripVendor'",
+							"value": "TripVendor",
 							"type": "String"
 						},
 						"StartTime": {
@@ -74,7 +74,7 @@
 							"type": "DateTime"
 						},
 						"Status": {
-							"value": "'Succeeded'",
+							"value": "Succeeded",
 							"type": "String"
 						}
 					}
@@ -107,11 +107,11 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "'CopyToAggTripVendorBuVendor'",
+							"value": "CopyToAggTripVendorBuVendor",
 							"type": "String"
 						},
 						"DestinationTable": {
-							"value": "'Agg_TripVendor_ByVendorid'",
+							"value": "Agg_TripVendor_ByVendorid",
 							"type": "String"
 						},
 						"EndTime": {
@@ -137,15 +137,15 @@
 							"type": "String"
 						},
 						"RowsCopied": {
-							"value": "0",
+							"value": "@activity('Agg_TripVendor_ByVendorid').output.rowsCopied",
 							"type": "Int32"
 						},
 						"RowsRead": {
-							"value": "0",
+							"value": "@activity('Agg_TripVendor_ByVendorid').output.rowsRead",
 							"type": "Int32"
 						},
 						"SourceTable": {
-							"value": "'TripVendor'",
+							"value": "TripVendor",
 							"type": "String"
 						},
 						"StartTime": {
@@ -153,7 +153,7 @@
 							"type": "DateTime"
 						},
 						"Status": {
-							"value": "'Failed'",
+							"value": "Failed",
 							"type": "String"
 						}
 					}
