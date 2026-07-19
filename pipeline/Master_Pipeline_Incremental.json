@@ -72,7 +72,7 @@
 				}
 			},
 			{
-				"name": "Agg_TripDetails",
+				"name": "Inc_TripDetails",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -88,18 +88,18 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Agg_TripDetails",
+						"referenceName": "Inc_TripDetails",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "Agg_Payment",
+				"name": "Inc_Payment",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Agg_TripDetails",
+						"activity": "Inc_TripDetails",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -111,18 +111,18 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Agg_Payment",
+						"referenceName": "Inc_Payment",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "Agg_FareDetails",
+				"name": "Inc_FareDetails",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Agg_Payment",
+						"activity": "Inc_Payment",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -134,7 +134,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Agg_FareDetails",
+						"referenceName": "Inc_FareDetails",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
@@ -145,7 +145,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Agg_FareDetails",
+						"activity": "Inc_FareDetails",
 						"dependencyConditions": [
 							"Succeeded"
 						]
