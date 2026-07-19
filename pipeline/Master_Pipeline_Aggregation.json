@@ -40,6 +40,29 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "Agg_TripLocation",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Agg_TripPic",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Agg_TripLocation",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"annotations": []
