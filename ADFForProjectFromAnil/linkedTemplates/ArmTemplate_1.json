@@ -2135,6 +2135,37 @@
 				"[concat(variables('factoryId'), '/pipelines/Agg_FareDetails')]",
 				"[concat(variables('factoryId'), '/pipelines/VendorSummary')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Trigger_Master_Aggregation')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "Master_Pipeline_Aggregation",
+						"type": "PipelineReference"
+					},
+					"parameters": {}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Hour",
+					"interval": 10,
+					"startTime": "2026-07-19T09:30:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 50,
+					"retryPolicy": {
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/Master_Pipeline_Aggregation')]"
+			]
 		}
 	]
 }
