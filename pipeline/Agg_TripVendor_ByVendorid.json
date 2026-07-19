@@ -107,7 +107,7 @@
 							"type": "DateTime"
 						},
 						"ErrorMessage": {
-							"value": "''",
+							"value": "'Success'",
 							"type": "String"
 						},
 						"PipelineName": {
