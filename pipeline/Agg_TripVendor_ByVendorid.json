@@ -25,7 +25,7 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "CopyToAggTripVendorBuVendor",
+							"value": "Copy to AggTripVendorBuVendor",
 							"type": "String"
 						},
 						"DestinationTable": {
@@ -110,7 +110,7 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "CopyToAggTripVendorBuVendor",
+							"value": "Copy to AggTripVendorBuVendor",
 							"type": "String"
 						},
 						"DestinationTable": {
