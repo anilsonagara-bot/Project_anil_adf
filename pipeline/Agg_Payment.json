@@ -34,7 +34,7 @@
 							"referenceName": "Staging",
 							"type": "LinkedServiceReference"
 						},
-						"path": "aggregation/staging"
+						"path": "aggregation/staging/Agg_Payment"
 					},
 					"logSettings": {
 						"enableCopyActivityLog": true,
@@ -47,7 +47,7 @@
 								"referenceName": "Logging",
 								"type": "LinkedServiceReference"
 							},
-							"path": "aggregation/logging"
+							"path": "aggregation/logging/Agg_Payment"
 						}
 					},
 					"translator": {
