@@ -86,8 +86,13 @@
 					},
 					"sink": {
 						"type": "SqlDWSink",
-						"preCopyScript": "TRUNCATE TABLE stg_TripVendor",
-						"writeBehavior": "Insert",
+						"writeBehavior": "Upsert",
+						"upsertSettings": {
+							"keys": [
+								"medallion"
+							],
+							"interimSchemaName": ""
+						},
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
 					},
@@ -216,7 +221,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "Stage_vendor",
+						"referenceName": "TripVendor_dest",
 						"type": "DatasetReference"
 					}
 				]
