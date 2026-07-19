@@ -70,7 +70,7 @@
 							"type": "String"
 						},
 						"StartTime": {
-							"value": "@activity('<CopyActivityName>').output.executionDetails[0].start",
+							"value": "@activity('Agg_TripVendor_ByVendorid').output.executionDetails[0].start",
 							"type": "DateTime"
 						},
 						"Status": {
@@ -149,7 +149,7 @@
 							"type": "String"
 						},
 						"StartTime": {
-							"value": "@activity('<CopyActivityName>').output.executionDetails[0].start",
+							"value": "@activity('Agg_TripVendor_ByVendorid').output.executionDetails[0].start",
 							"type": "DateTime"
 						},
 						"Status": {
