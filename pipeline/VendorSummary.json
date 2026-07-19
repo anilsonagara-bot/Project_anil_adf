@@ -143,7 +143,7 @@
 							"type": "DateTime"
 						},
 						"Status": {
-							"value": "'Succeeded'",
+							"value": "Succeeded",
 							"type": "String"
 						}
 					}
