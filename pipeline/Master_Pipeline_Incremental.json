@@ -180,7 +180,7 @@
 					},
 					"url": "https://prod-58.southeastasia.logic.azure.com:443/workflows/7380c3c9d70049538bd2502242fedf1a/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=5UuWTKgbAwnJBjsVZBTctt5SS7-I7ZYmjzRlU7XSW5U",
 					"body": {
-						"value": "{\n  \"pipelineName\": \"@{pipeline().Pipeline}\",\n  \"status\": \"Succeeded\",\n  \"runId\": \"@{pipeline().RunId}\",\n  \"message\": \"Master pipeline completed successfully.\"\n}",
+						"value": "{\n  \"pipelineName\": \"@{pipeline().Pipeline}\",\n  \"status\": \"Succeeded\",\n  \"runId\": \"@{pipeline().RunId}\",\n  \"message\": \" Incremental Master pipeline completed successfully.\"\n}",
 						"type": "Expression"
 					}
 				}
@@ -211,7 +211,7 @@
 					},
 					"url": "https://prod-58.southeastasia.logic.azure.com:443/workflows/7380c3c9d70049538bd2502242fedf1a/triggers/When_an_HTTP_request_is_received/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2FWhen_an_HTTP_request_is_received%2Frun&sv=1.0&sig=5UuWTKgbAwnJBjsVZBTctt5SS7-I7ZYmjzRlU7XSW5U",
 					"body": {
-						"value": "{\n  \"pipelineName\": \"@{pipeline().Pipeline}\",\n  \"status\": \"Failed\",\n  \"runId\": \"@{pipeline().RunId}\",\n  \"message\": \"@{coalesce(activity('Agg_TripVendor_ByVendorid').error.message, activity('Agg_FareDetails').error.message, 'Unknown error')}\"\n}",
+						"value": "{\n  \"pipelineName\": \"@{pipeline().Pipeline}\",\n  \"status\": \"Failed\",\n  \"runId\": \"@{pipeline().RunId}\",\n  \"message\": \"@{coalesce(activity('Inc_Payment').error.message, activity('Inc_FareDetails').error.message, 'Unknown error')}\"\n}",
 						"type": "Expression"
 					}
 				}
