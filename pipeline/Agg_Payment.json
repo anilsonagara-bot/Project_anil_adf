@@ -33,7 +33,8 @@
 						"linkedServiceName": {
 							"referenceName": "Staging",
 							"type": "LinkedServiceReference"
-						}
+						},
+						"path": "aggregation/staging"
 					},
 					"logSettings": {
 						"enableCopyActivityLog": true,
