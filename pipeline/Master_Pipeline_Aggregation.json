@@ -109,6 +109,52 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "Agg_FareDetails",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Agg_Payment",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Agg_FareDetails",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "VendorSummary",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Agg_FareDetails",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "VendorSummary",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"annotations": []
