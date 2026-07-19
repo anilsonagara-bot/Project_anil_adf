@@ -323,11 +323,11 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "Copy Incremental Trip Vendor",
+							"value": "Copy Incremental TripLocation",
 							"type": "String"
 						},
 						"DestinationTable": {
-							"value": "TripVendor",
+							"value": "TripLocation",
 							"type": "String"
 						},
 						"EndTime": {
@@ -354,28 +354,28 @@
 						},
 						"RowsCopied": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.rowsCopied",
+								"value": "@activity('CopyIncrementalTripLocation').output.rowsCopied",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"RowsRead": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.rowsRead",
+								"value": "@activity('CopyIncrementalTripLocation').output.rowsRead",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"SourceTable": {
 							"value": {
-								"value": "TripVendor",
+								"value": "TripLocation",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"StartTime": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.executionDetails[0].start",
+								"value": "@activity('CopyIncrementalTripLocation').output.executionDetails[0].start",
 								"type": "Expression"
 							},
 							"type": "DateTime"
@@ -414,11 +414,11 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "Copy Incremental Trip Vendor",
+							"value": "Copy Incremental Trip Location",
 							"type": "String"
 						},
 						"DestinationTable": {
-							"value": "TripVendor",
+							"value": "TripLocation",
 							"type": "String"
 						},
 						"EndTime": {
@@ -427,7 +427,7 @@
 						},
 						"ErrorMessage": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').error.message",
+								"value": "@activity('CopyIncrementalTripLocation').error.message",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -445,25 +445,25 @@
 						},
 						"RowsCopied": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.rowsCopied",
+								"value": "@activity('CopyIncrementalTripLocation').output.rowsCopied",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"RowsRead": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.rowsRead",
+								"value": "@activity('CopyIncrementalTripLocation').output.rowsRead",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"SourceTable": {
-							"value": "TripVendor",
+							"value": "TripLocation",
 							"type": "String"
 						},
 						"StartTime": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.executionDetails[0].start",
+								"value": "@activity('CopyIncrementalTripLocation').output.executionDetails[0].start",
 								"type": "Expression"
 							},
 							"type": "DateTime"
