@@ -88,11 +88,11 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "'CopyToAggTripVendorBuVendor'",
+							"value": "CopytoVendorSummary",
 							"type": "String"
 						},
 						"DestinationTable": {
-							"value": "'Agg_TripVendor_ByVendorid'",
+							"value": "VendorSummary",
 							"type": "String"
 						},
 						"EndTime": {
@@ -129,11 +129,17 @@
 							"type": "Int32"
 						},
 						"SourceTable": {
-							"value": "'TripVendor'",
+							"value": {
+								"value": "'MultiplTables'",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"StartTime": {
-							"value": "@activity('Agg_TripVendor_ByVendorid').output.executionDetails[0].start",
+							"value": {
+								"value": "@activity('VendorSummary').output.executionDetails[0].start",
+								"type": "Expression"
+							},
 							"type": "DateTime"
 						},
 						"Status": {
