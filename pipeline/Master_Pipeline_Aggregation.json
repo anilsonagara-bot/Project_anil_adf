@@ -63,6 +63,52 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "Agg_TripDetails",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Agg_TripLocation",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Agg_TripDetails",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Agg_Payment",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Agg_TripDetails",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Agg_Payment",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"annotations": []
