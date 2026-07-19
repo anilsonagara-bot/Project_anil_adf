@@ -2883,34 +2883,403 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/Trigger_Master_Aggregation')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
+			"name": "[concat(parameters('factoryName'), '/Inc_TripVendor')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipeline": {
-					"pipelineReference": {
-						"referenceName": "Master_Pipeline_Aggregation",
-						"type": "PipelineReference"
+				"activities": [
+					{
+						"name": "LookupOldWatermark",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlDWSource",
+								"sqlReaderQuery": "SELECT LastLoadedValue FROM WatermarkControl WHERE TableName = 'TripVendor'",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "LookupOldWatermark",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
 					},
-					"parameters": {}
+					{
+						"name": "LookupNewWatermark",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT MAX(LastUpdated) AS NewWatermark FROM TripVendor",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "LookupNewWatermark1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					},
+					{
+						"name": "CopyIncrementalTripVendor",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LookupNewWatermark",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT * FROM TripVendor\nWHERE LastUpdated > '@{activity('LookupOldWatermark').output.firstRow.LastLoadedValue}'\nAND LastUpdated <= '@{activity('LookupNewWatermark').output.firstRow.NewWatermark}'",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": "TRUNCATE TABLE stg_TripVendor",
+								"allowCopyCommand": true,
+								"copyCommandSettings": {},
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "Staging",
+									"type": "LinkedServiceReference"
+								},
+								"path": "incrementalload/staging/TripVendor"
+							},
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Warning",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "Logging",
+										"type": "LinkedServiceReference"
+									},
+									"path": "incrementalload/logging/TripVendor"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "medallion",
+											"type": "String"
+										},
+										"sink": {
+											"name": "medallion",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "hack_license",
+											"type": "String"
+										},
+										"sink": {
+											"name": "hack_license",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "Vendor_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "Vendor_id",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "rate_code",
+											"type": "Byte"
+										},
+										"sink": {
+											"name": "rate_code",
+											"type": "Byte"
+										}
+									},
+									{
+										"source": {
+											"name": "store_and_fwd_flag",
+											"type": "String"
+										},
+										"sink": {
+											"name": "store_and_fwd_flag",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "CreatedDate",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "CreatedDate",
+											"type": "DateTime"
+										}
+									},
+									{
+										"source": {
+											"name": "LastUpdated",
+											"type": "DateTime"
+										},
+										"sink": {
+											"name": "LastUpdated",
+											"type": "DateTime"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "LookupNewWatermark1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Stage_vendor",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "UpsertTripVendor",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "CopyIncrementalTripVendor",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_UpsertTripVendor]",
+							"storedProcedureParameters": {
+								"NewWatermark": {
+									"value": {
+										"value": "@activity('LookupNewWatermark').output.firstRow.NewWatermark",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "DedicatedPoolForProject",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
 				},
-				"type": "TumblingWindowTrigger",
-				"typeProperties": {
-					"frequency": "Hour",
-					"interval": 10,
-					"startTime": "2026-07-19T09:30:00Z",
-					"delay": "00:00:00",
-					"maxConcurrency": 50,
-					"retryPolicy": {
-						"intervalInSeconds": 30
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/LookupOldWatermark')]",
+				"[concat(variables('factoryId'), '/datasets/LookupNewWatermark1')]",
+				"[concat(variables('factoryId'), '/datasets/Stage_vendor')]",
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]",
+				"[concat(variables('factoryId'), '/linkedServices/Staging')]",
+				"[concat(variables('factoryId'), '/linkedServices/Logging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LookupOldWatermark')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "TableName",
+						"type": "varchar"
 					},
-					"dependsOn": []
+					{
+						"name": "WatermarkColumn",
+						"type": "varchar"
+					},
+					{
+						"name": "LastLoadedValue",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "WatermarkControl"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/Master_Pipeline_Aggregation')]"
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerTable4')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrimConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrimConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LookupNewWatermark')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LookupNewWatermark1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrimConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrimConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Stage_vendor')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "medallion",
+						"type": "char"
+					},
+					{
+						"name": "hack_license",
+						"type": "char"
+					},
+					{
+						"name": "Vendor_id",
+						"type": "varchar"
+					},
+					{
+						"name": "rate_code",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "store_and_fwd_flag",
+						"type": "char"
+					},
+					{
+						"name": "CreatedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "LastUpdated",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "stg_TripVendor"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
 			]
 		}
 	]
