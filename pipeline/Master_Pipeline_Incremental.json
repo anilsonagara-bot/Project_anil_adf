@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Agg_TripVendor_ByVendorid",
+				"name": "Inc_TripVendor",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -19,18 +19,18 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Agg_TripVendor_ByVendorid",
+						"referenceName": "Inc_TripVendor",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "Agg_TripPic",
+				"name": "Inc_TripPic",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Agg_TripVendor_ByVendorid",
+						"activity": "Inc_TripVendor",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -42,18 +42,18 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Agg_TripPic",
+						"referenceName": "Inc_TripPic",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "Agg_TripLocation",
+				"name": "Inc_TripLocation",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Agg_TripPic",
+						"activity": "Inc_TripPic",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -65,7 +65,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "Agg_TripLocation",
+						"referenceName": "Inc_TripLocation",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
@@ -76,7 +76,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Agg_TripLocation",
+						"activity": "Inc_TripLocation",
 						"dependencyConditions": [
 							"Succeeded"
 						]
