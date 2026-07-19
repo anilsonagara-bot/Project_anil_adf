@@ -5,8 +5,6 @@
 			{
 				"name": "Agg_TripVendor_ByVendorid",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "MasterStartTime",
@@ -30,8 +28,6 @@
 			{
 				"name": "Agg_TripPic",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Agg_TripVendor_ByVendorid",
@@ -55,8 +51,6 @@
 			{
 				"name": "Agg_TripLocation",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Agg_TripPic",
@@ -80,8 +74,6 @@
 			{
 				"name": "Agg_TripDetails",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Agg_TripLocation",
@@ -105,8 +97,6 @@
 			{
 				"name": "Agg_Payment",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Agg_TripDetails",
@@ -130,8 +120,6 @@
 			{
 				"name": "Agg_FareDetails",
 				"type": "ExecutePipeline",
-				"state": "Inactive",
-				"onInactiveMarkAs": "Succeeded",
 				"dependsOn": [
 					{
 						"activity": "Agg_Payment",
