@@ -141,29 +141,6 @@
 				}
 			},
 			{
-				"name": "VendorSummary",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "Inc_FareDetails",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "VendorSummary",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
 				"name": "MasterStartTime",
 				"type": "SetVariable",
 				"dependsOn": [],
@@ -182,7 +159,7 @@
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "VendorSummary",
+						"activity": "Inc_FareDetails",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -213,7 +190,7 @@
 				"type": "WebActivity",
 				"dependsOn": [
 					{
-						"activity": "VendorSummary",
+						"activity": "Inc_FareDetails",
 						"dependencyConditions": [
 							"Failed"
 						]
