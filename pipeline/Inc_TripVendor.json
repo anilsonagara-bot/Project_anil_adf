@@ -81,7 +81,8 @@
 					"sink": {
 						"type": "SqlDWSink",
 						"preCopyScript": "TRUNCATE TABLE stg_TripVendor",
-						"allowCopyCommand": true,
+						"writeBehavior": "Insert",
+						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
 					},
 					"enableStaging": true,
@@ -112,74 +113,93 @@
 							{
 								"source": {
 									"name": "medallion",
-									"type": "String"
+									"type": "String",
+									"physicalType": "char"
 								},
 								"sink": {
 									"name": "medallion",
-									"type": "String"
+									"type": "String",
+									"physicalType": "char"
 								}
 							},
 							{
 								"source": {
 									"name": "hack_license",
-									"type": "String"
+									"type": "String",
+									"physicalType": "char"
 								},
 								"sink": {
 									"name": "hack_license",
-									"type": "String"
+									"type": "String",
+									"physicalType": "char"
 								}
 							},
 							{
 								"source": {
 									"name": "Vendor_id",
-									"type": "String"
+									"type": "String",
+									"physicalType": "varchar"
 								},
 								"sink": {
 									"name": "Vendor_id",
-									"type": "String"
+									"type": "String",
+									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
 									"name": "rate_code",
-									"type": "Byte"
+									"type": "Byte",
+									"physicalType": "tinyint"
 								},
 								"sink": {
 									"name": "rate_code",
-									"type": "Byte"
+									"type": "Byte",
+									"physicalType": "tinyint"
 								}
 							},
 							{
 								"source": {
 									"name": "store_and_fwd_flag",
-									"type": "String"
+									"type": "String",
+									"physicalType": "char"
 								},
 								"sink": {
 									"name": "store_and_fwd_flag",
-									"type": "String"
+									"type": "String",
+									"physicalType": "char"
 								}
 							},
 							{
 								"source": {
 									"name": "CreatedDate",
-									"type": "DateTime"
+									"type": "DateTime",
+									"physicalType": "datetime"
 								},
 								"sink": {
 									"name": "CreatedDate",
-									"type": "DateTime"
+									"type": "DateTime",
+									"physicalType": "datetime"
 								}
 							},
 							{
 								"source": {
 									"name": "LastUpdated",
-									"type": "DateTime"
+									"type": "DateTime",
+									"physicalType": "datetime"
 								},
 								"sink": {
 									"name": "LastUpdated",
-									"type": "DateTime"
+									"type": "DateTime",
+									"physicalType": "datetime"
 								}
 							}
-						]
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
 					}
 				},
 				"inputs": [
