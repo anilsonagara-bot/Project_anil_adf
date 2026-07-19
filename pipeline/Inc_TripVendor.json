@@ -249,11 +249,17 @@
 					"storedProcedureName": "[dbo].[usp_UpdateWatermark]",
 					"storedProcedureParameters": {
 						"NewWatermark": {
-							"value": "TripVendor",
+							"value": {
+								"value": "@activity('LookupNewWatermark').output.firstRow.NewWatermark",
+								"type": "Expression"
+							},
 							"type": "DateTime"
 						},
 						"TableName": {
-							"value": "@activity('LookupNewWatermark').output.firstRow.NewWatermark",
+							"value": {
+								"value": "TripVendor",
+								"type": "Expression"
+							},
 							"type": "String"
 						}
 					}
