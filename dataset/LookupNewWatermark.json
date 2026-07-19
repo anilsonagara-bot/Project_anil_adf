@@ -1,0 +1,12 @@
+{
+	"name": "LookupNewWatermark",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DedicatedPoolForProject",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": []
+	}
+}

@@ -1,0 +1,50 @@
+{
+	"name": "Stage_vendor",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DedicatedPoolForProject",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "medallion",
+				"type": "char"
+			},
+			{
+				"name": "hack_license",
+				"type": "char"
+			},
+			{
+				"name": "Vendor_id",
+				"type": "varchar"
+			},
+			{
+				"name": "rate_code",
+				"type": "tinyint",
+				"precision": 3
+			},
+			{
+				"name": "store_and_fwd_flag",
+				"type": "char"
+			},
+			{
+				"name": "CreatedDate",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			},
+			{
+				"name": "LastUpdated",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "stg_TripVendor"
+		}
+	}
+}
