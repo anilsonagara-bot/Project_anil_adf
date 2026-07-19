@@ -100,7 +100,10 @@
 							"type": "DateTime"
 						},
 						"ErrorMessage": {
-							"value": "@activity('VendorSummary').error.message",
+							"value": {
+								"value": "''",
+								"type": "Expression"
+							},
 							"type": "String"
 						},
 						"PipelineName": {
