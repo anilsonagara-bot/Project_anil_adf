@@ -1,0 +1,42 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "ADFForProjectFromAnil"
+		},
+		"OnPrimConnection_password": {
+			"value": ""
+		},
+		"DedicatedPoolForProject_password": {
+			"value": ""
+		},
+		"Logging_connectionString": {
+			"value": ""
+		},
+		"Staging_connectionString": {
+			"value": ""
+		},
+		"OnPrimConnection_properties_typeProperties_server": {
+			"value": "DESKTOP-L7GD08G\\SQL2025"
+		},
+		"OnPrimConnection_properties_typeProperties_database": {
+			"value": "TRIP_DB_ENGG_SRC"
+		},
+		"OnPrimConnection_properties_typeProperties_userName": {
+			"value": "adf_user"
+		},
+		"IRForOnPrim_properties_typeProperties_linkedInfo_resourceId": {
+			"value": "/subscriptions/1c952c35-3101-4f33-89c0-fdc9fcca2f20/resourcegroups/DevelopmentResourceGroup/providers/Microsoft.DataFactory/factories/azuredatafactoryanil/integrationruntimes/SelfhostedIR"
+		},
+		"DedicatedPoolForProject_properties_typeProperties_server": {
+			"value": "logicalserverforproject.database.windows.net"
+		},
+		"DedicatedPoolForProject_properties_typeProperties_database": {
+			"value": "DedicatedPoolForProject"
+		},
+		"DedicatedPoolForProject_properties_typeProperties_userName": {
+			"value": "anil"
+		}
+	}
+}

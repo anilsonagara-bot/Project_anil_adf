@@ -1,0 +1,139 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ADFForProjectFromAnil"
+		},
+		"OnPrimConnection_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'OnPrimConnection'"
+		},
+		"DedicatedPoolForProject_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'DedicatedPoolForProject'"
+		},
+		"Logging_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Logging'"
+		},
+		"Staging_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Staging'"
+		},
+		"OnPrimConnection_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "DESKTOP-L7GD08G\\SQL2025"
+		},
+		"OnPrimConnection_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "TRIP_DB_ENGG_SRC"
+		},
+		"OnPrimConnection_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "adf_user"
+		},
+		"IRForOnPrim_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/1c952c35-3101-4f33-89c0-fdc9fcca2f20/resourcegroups/DevelopmentResourceGroup/providers/Microsoft.DataFactory/factories/azuredatafactoryanil/integrationruntimes/SelfhostedIR"
+		},
+		"DedicatedPoolForProject_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "logicalserverforproject.database.windows.net"
+		},
+		"DedicatedPoolForProject_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "DedicatedPoolForProject"
+		},
+		"DedicatedPoolForProject_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "anil"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "ADFForProjectFromAnil_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"DedicatedPoolForProject_password": {
+						"value": "[parameters('DedicatedPoolForProject_password')]"
+					},
+					"Logging_connectionString": {
+						"value": "[parameters('Logging_connectionString')]"
+					},
+					"Staging_connectionString": {
+						"value": "[parameters('Staging_connectionString')]"
+					},
+					"OnPrimConnection_password": {
+						"value": "[parameters('OnPrimConnection_password')]"
+					},
+					"IRForOnPrim_properties_typeProperties_linkedInfo_resourceId": {
+						"value": "[parameters('IRForOnPrim_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"DedicatedPoolForProject_properties_typeProperties_server": {
+						"value": "[parameters('DedicatedPoolForProject_properties_typeProperties_server')]"
+					},
+					"DedicatedPoolForProject_properties_typeProperties_database": {
+						"value": "[parameters('DedicatedPoolForProject_properties_typeProperties_database')]"
+					},
+					"DedicatedPoolForProject_properties_typeProperties_userName": {
+						"value": "[parameters('DedicatedPoolForProject_properties_typeProperties_userName')]"
+					},
+					"OnPrimConnection_properties_typeProperties_server": {
+						"value": "[parameters('OnPrimConnection_properties_typeProperties_server')]"
+					},
+					"OnPrimConnection_properties_typeProperties_database": {
+						"value": "[parameters('OnPrimConnection_properties_typeProperties_database')]"
+					},
+					"OnPrimConnection_properties_typeProperties_userName": {
+						"value": "[parameters('OnPrimConnection_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "ADFForProjectFromAnil_ArmTemplate_1",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_1.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ADFForProjectFromAnil_ArmTemplate_0')]"
+			]
+		}
+	]
+}

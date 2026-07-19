@@ -1,0 +1,1538 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ADFForProjectFromAnil"
+		},
+		"OnPrimConnection_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'OnPrimConnection'"
+		},
+		"DedicatedPoolForProject_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'DedicatedPoolForProject'"
+		},
+		"Logging_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Logging'"
+		},
+		"Staging_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'Staging'"
+		},
+		"OnPrimConnection_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "DESKTOP-L7GD08G\\SQL2025"
+		},
+		"OnPrimConnection_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "TRIP_DB_ENGG_SRC"
+		},
+		"OnPrimConnection_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "adf_user"
+		},
+		"IRForOnPrim_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/1c952c35-3101-4f33-89c0-fdc9fcca2f20/resourcegroups/DevelopmentResourceGroup/providers/Microsoft.DataFactory/factories/azuredatafactoryanil/integrationruntimes/SelfhostedIR"
+		},
+		"DedicatedPoolForProject_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "logicalserverforproject.database.windows.net"
+		},
+		"DedicatedPoolForProject_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "DedicatedPoolForProject"
+		},
+		"DedicatedPoolForProject_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "anil"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_TripVendor_ByVendorid')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Agg_TripVendor_ByVendorid",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT Vendor_id, COUNT(*) AS taxi_count\nFROM TripVendor\nGROUP BY Vendor_id",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": "TRUNCATE TABLE [dbo].[Agg_TripVendor_ByVendorid]",
+								"writeBehavior": "Insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "Staging",
+									"type": "LinkedServiceReference"
+								},
+								"path": "aggregation/staging/Agg_TripVendor_ByVendorid"
+							},
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Info",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "Logging",
+										"type": "LinkedServiceReference"
+									},
+									"path": "aggregation/logging/Agg_TripVendor_ByVendorid"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "Vendor_id",
+											"type": "String",
+											"physicalType": "varchar"
+										},
+										"sink": {
+											"name": "Vendor_id",
+											"type": "String",
+											"physicalType": "varchar"
+										}
+									},
+									{
+										"source": {
+											"name": "taxi_count",
+											"type": "Int32",
+											"physicalType": "int"
+										},
+										"sink": {
+											"name": "taxi_count",
+											"type": "Int32",
+											"physicalType": "int"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Agg_TripVendor_ByVendorid",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AzureSynapseAnalyticsTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Success",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Agg_TripVendor_ByVendorid",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_LogPipelineRun]",
+							"storedProcedureParameters": {
+								"ActivityName": {
+									"value": "'CopyToAggTripVendorBuVendor'",
+									"type": "String"
+								},
+								"DestinationTable": {
+									"value": "'Agg_TripVendor_ByVendorid'",
+									"type": "String"
+								},
+								"EndTime": {
+									"value": "@utcnow()",
+									"type": "DateTime"
+								},
+								"ErrorMessage": {
+									"value": "''",
+									"type": "String"
+								},
+								"PipelineName": {
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineRunId": {
+									"value": "@pipeline().RunId",
+									"type": "String"
+								},
+								"RowsCopied": {
+									"value": {
+										"value": "@activity('Agg_TripVendor_ByVendorid').output.rowsCopied",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"RowsRead": {
+									"value": {
+										"value": "@activity('Agg_TripVendor_ByVendorid').output.rowsRead",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"SourceTable": {
+									"value": "'TripVendor'",
+									"type": "String"
+								},
+								"StartTime": {
+									"value": "@activity('<CopyActivityName>').output.executionDetails[0].start",
+									"type": "DateTime"
+								},
+								"Status": {
+									"value": "'Succeeded'",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "DedicatedPoolForProject",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Fail",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "Agg_TripVendor_ByVendorid",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_LogPipelineRun]",
+							"storedProcedureParameters": {
+								"ActivityName": {
+									"value": "'CopyToAggTripVendorBuVendor'",
+									"type": "String"
+								},
+								"DestinationTable": {
+									"value": "'Agg_TripVendor_ByVendorid'",
+									"type": "String"
+								},
+								"EndTime": {
+									"value": "@utcnow()",
+									"type": "DateTime"
+								},
+								"ErrorMessage": {
+									"value": {
+										"value": "@activity('Agg_TripVendor_ByVendorid').error.message",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineName": {
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineRunId": {
+									"value": "@pipeline().RunId",
+									"type": "String"
+								},
+								"RowsCopied": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"RowsRead": {
+									"value": "0",
+									"type": "Int32"
+								},
+								"SourceTable": {
+									"value": "'TripVendor'",
+									"type": "String"
+								},
+								"StartTime": {
+									"value": "@activity('<CopyActivityName>').output.executionDetails[0].start",
+									"type": "DateTime"
+								},
+								"Status": {
+									"value": "'Failed'",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "DedicatedPoolForProject",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Agg_TripVendor_ByVendorid')]",
+				"[concat(variables('factoryId'), '/datasets/AzureSynapseAnalyticsTable1')]",
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]",
+				"[concat(variables('factoryId'), '/linkedServices/Staging')]",
+				"[concat(variables('factoryId'), '/linkedServices/Logging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_TripVendor_ByVendorid')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrimConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrimConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/OnPrimConnection')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('OnPrimConnection_properties_typeProperties_server')]",
+					"database": "[parameters('OnPrimConnection_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": true,
+					"authenticationType": "SQL",
+					"userName": "[parameters('OnPrimConnection_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('OnPrimConnection_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "IRForOnPrim",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/IRForOnPrim')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/IRForOnPrim')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"typeProperties": {
+					"linkedInfo": {
+						"resourceId": "[parameters('IRForOnPrim_properties_typeProperties_linkedInfo_resourceId')]",
+						"authorizationType": "Rbac"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DedicatedPoolForProject')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"server": "[parameters('DedicatedPoolForProject_properties_typeProperties_server')]",
+					"database": "[parameters('DedicatedPoolForProject_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": false,
+					"authenticationType": "SQL",
+					"userName": "[parameters('DedicatedPoolForProject_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('DedicatedPoolForProject_password')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSynapseAnalyticsTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Agg_TripVendor_ByVendorid"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_FareDetails')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Agg_FareDetails",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT \n    medallion,\n    COUNT(*) as [trip_count],\n    SUM(fare_amount)  as [total_fare],        \n    SUM(surcharge) as [total_surcharge],\n    SUM(mta_tax) as [total_mta_tax],\n    SUM(tip_amount) as [total_tips],\n    SUM(tolls_amount) as [total_tolls],\n    SUM(fare_amount + surcharge + mta_tax + tip_amount + tolls_amount) as [total_charged],\n    AVG(fare_amount) as [avg_fare_per_trip]  \nFROM FareDetails\nGROUP BY medallion;\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": "TRUNCATE TABLE [dbo].[Agg_FareDetails]",
+								"writeBehavior": "Insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "Staging",
+									"type": "LinkedServiceReference"
+								},
+								"path": "aggregation/staging/Agg_FareDetails"
+							},
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Info",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "Logging",
+										"type": "LinkedServiceReference"
+									},
+									"path": "aggregation/logging/Agg_FareDetails"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Agg_FareDetails",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AggFareDetails",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Agg_FareDetails')]",
+				"[concat(variables('factoryId'), '/datasets/AggFareDetails')]",
+				"[concat(variables('factoryId'), '/linkedServices/Staging')]",
+				"[concat(variables('factoryId'), '/linkedServices/Logging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSynapseAnalyticsTable2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "medallion",
+						"type": "char"
+					},
+					{
+						"name": "trip_count",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_fare",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_surcharge",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_mta_tax",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_tips",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_tolls",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_charged",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "avg_fare_per_trip",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Agg_FareDetails"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_FareDetails')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrimConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrimConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AggFareDetails')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "medallion",
+						"type": "char"
+					},
+					{
+						"name": "trip_count",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_fare",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_surcharge",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_mta_tax",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_tips",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_tolls",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "total_charged",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "avg_fare_per_trip",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Agg_FareDetails"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_Payment')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Agg_Payment",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT medallion, \npayment_type, \nCOUNT(*) as [payment_count]   , \nSUM(total_amount) as [total_paid]      \nFROM Payment\nGROUP BY medallion, payment_type;\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": "TRUNCATE TABLE [dbo].[Agg_Payment]",
+								"writeBehavior": "Insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "Staging",
+									"type": "LinkedServiceReference"
+								},
+								"path": "aggregation/staging/Agg_Payment"
+							},
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Info",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "Logging",
+										"type": "LinkedServiceReference"
+									},
+									"path": "aggregation/logging/Agg_Payment"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SqlServerTable1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Agg_Payment",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTable1')]",
+				"[concat(variables('factoryId'), '/datasets/Agg_Payment')]",
+				"[concat(variables('factoryId'), '/linkedServices/Staging')]",
+				"[concat(variables('factoryId'), '/linkedServices/Logging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerTable1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrimConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrimConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_Payment')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "medallion",
+						"type": "char"
+					},
+					{
+						"name": "payment_type",
+						"type": "varchar"
+					},
+					{
+						"name": "payment_count",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_paid",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Agg_Payment"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Logging')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('Logging_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Staging')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": "[parameters('Staging_connectionString')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_TripDetails')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Agg_TripDetails",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT medallion,\n    COUNT(*) as [trip_count],\n    SUM(trip_distance) as [total_distance],\n    AVG(trip_distance) as [avg_distance]       ,\n    SUM(trip_time_in_secs) as [total_trip_time_secs],\n    AVG(CAST(passenger_count AS DECIMAL(5,2))) as     [avg_passengers]     ,\n    MAX(trip_distance) as [longest_trip]       \nFROM TripDetails\nGROUP BY medallion;\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": "TRUNCATE TABLE [dbo].[Agg_TripDetails]",
+								"writeBehavior": "Insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "Staging",
+									"type": "LinkedServiceReference"
+								},
+								"path": "aggregation/staging/Agg_TripDetails"
+							},
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Info",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "Logging",
+										"type": "LinkedServiceReference"
+									},
+									"path": "aggregation/logging/Agg_TripDetails"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SqlServerTable2",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Agg_TripDetails",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTable2')]",
+				"[concat(variables('factoryId'), '/datasets/Agg_TripDetails')]",
+				"[concat(variables('factoryId'), '/linkedServices/Staging')]",
+				"[concat(variables('factoryId'), '/linkedServices/Logging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerTable2')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrimConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrimConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_TripDetails')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "medallion",
+						"type": "char"
+					},
+					{
+						"name": "trip_count",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_distance",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "avg_distance",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					},
+					{
+						"name": "total_trip_time_secs",
+						"type": "bigint",
+						"precision": 19
+					},
+					{
+						"name": "avg_passengers",
+						"type": "decimal",
+						"precision": 5,
+						"scale": 2
+					},
+					{
+						"name": "longest_trip",
+						"type": "decimal",
+						"precision": 6,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Agg_TripDetails"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_TripLocation')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Agg_TripLocation",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT medallion, COUNT(*) as [pickup_count]    \nFROM TripLocation\nGROUP BY medallion;\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": "TRUNCATE TABLE [dbo].[Agg_TripLocation]",
+								"writeBehavior": "Insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "Staging",
+									"type": "LinkedServiceReference"
+								},
+								"path": "aggregation/staging/Agg_TripLocation"
+							},
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Info",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "Logging",
+										"type": "LinkedServiceReference"
+									},
+									"path": "aggregation/logging/Agg_TripLocation"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "SqlServerTable3",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Agg_TripLocation",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/SqlServerTable3')]",
+				"[concat(variables('factoryId'), '/datasets/Agg_TripLocation')]",
+				"[concat(variables('factoryId'), '/linkedServices/Staging')]",
+				"[concat(variables('factoryId'), '/linkedServices/Logging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SqlServerTable3')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrimConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrimConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_TripLocation')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "medallion",
+						"type": "char"
+					},
+					{
+						"name": "pickup_count",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Agg_TripLocation"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_TripPic')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Agg_TripPic",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT medallion,\n    COUNT(*) as [trip_count]             ,\n    AVG(DATEDIFF(SECOND, pickup_datetime, dropoff_datetime)) as  [avg_trip_duration_secs],\n    MIN(pickup_datetime) as [earliest_trip]  ,        \n    MAX(dropoff_datetime) as    [latest_trip]            \nFROM TripPic\nGROUP BY medallion;\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": "TRUNCATE TABLE [dbo].[Agg_TripPic]",
+								"writeBehavior": "Insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "Staging",
+									"type": "LinkedServiceReference"
+								},
+								"path": "aggregation/staging/Agg_TripPic"
+							},
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Info",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "Logging",
+										"type": "LinkedServiceReference"
+									},
+									"path": "aggregation/logging/Agg_TripPic"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Agg_TripPic",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Agg_TripPic1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Agg_TripPic')]",
+				"[concat(variables('factoryId'), '/datasets/Agg_TripPic1')]",
+				"[concat(variables('factoryId'), '/linkedServices/Staging')]",
+				"[concat(variables('factoryId'), '/linkedServices/Logging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_TripPic')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrimConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrimConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Agg_TripPic1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "medallion",
+						"type": "char"
+					},
+					{
+						"name": "trip_count",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "avg_trip_duration_secs",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "earliest_trip",
+						"type": "datetime2",
+						"scale": 0
+					},
+					{
+						"name": "latest_trip",
+						"type": "datetime2",
+						"scale": 0
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Agg_TripPic"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VendorSummary')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "VendorSummary",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "SqlServerSource",
+								"sqlReaderQuery": "SELECT \n    v.medallion, v.Vendor_id, v.rate_code,\n    fd.total_fare, fd.trip_count,\n    td.total_distance, td.avg_distance,\n    p.total_paid\nFROM TripVendor v\nLEFT JOIN (\n    SELECT medallion, SUM(fare_amount) AS total_fare, COUNT(*) AS trip_count\n    FROM FareDetails GROUP BY medallion\n) fd ON v.medallion = fd.medallion\nLEFT JOIN (\n    SELECT medallion, SUM(trip_distance) AS total_distance, AVG(trip_distance) AS avg_distance\n    FROM TripDetails GROUP BY medallion\n) td ON v.medallion = td.medallion\nLEFT JOIN (\n    SELECT medallion, SUM(total_amount) AS total_paid\n    FROM Payment GROUP BY medallion\n) p ON v.medallion = p.medallion;\n",
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"sink": {
+								"type": "SqlDWSink",
+								"preCopyScript": "TRUNCATE TABLE [dbo].[VendorSummary]",
+								"writeBehavior": "Insert",
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"logSettings": {
+								"enableCopyActivityLog": true,
+								"copyActivityLogSettings": {
+									"logLevel": "Info",
+									"enableReliableLogging": false
+								},
+								"logLocationSettings": {
+									"linkedServiceName": {
+										"referenceName": "Logging",
+										"type": "LinkedServiceReference"
+									},
+									"path": "aggregation/staging/VendorSummary"
+								}
+							},
+							"translator": {
+								"type": "TabularTranslator",
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "VendorSummary",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "VendorSummary1",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/VendorSummary')]",
+				"[concat(variables('factoryId'), '/datasets/VendorSummary1')]",
+				"[concat(variables('factoryId'), '/linkedServices/Logging')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VendorSummary')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPrimConnection",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [],
+				"typeProperties": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/OnPrimConnection')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/VendorSummary1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "medallion",
+						"type": "char"
+					},
+					{
+						"name": "Vendor_id",
+						"type": "varchar"
+					},
+					{
+						"name": "rate_code",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "total_fare",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "trip_count",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "total_distance",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					},
+					{
+						"name": "avg_distance",
+						"type": "decimal",
+						"precision": 10,
+						"scale": 2
+					},
+					{
+						"name": "total_paid",
+						"type": "decimal",
+						"precision": 12,
+						"scale": 2
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "VendorSummary"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		}
+	]
+}
