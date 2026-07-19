@@ -1,0 +1,31 @@
+{
+	"name": "LookupOldWatermark",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "DedicatedPoolForProject",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "TableName",
+				"type": "varchar"
+			},
+			{
+				"name": "WatermarkColumn",
+				"type": "varchar"
+			},
+			{
+				"name": "LastLoadedValue",
+				"type": "datetime",
+				"precision": 23,
+				"scale": 3
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "WatermarkControl"
+		}
+	}
+}
