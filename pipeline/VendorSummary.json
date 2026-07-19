@@ -88,7 +88,7 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "CopytoVendorSummary",
+							"value": "Copy to VendorSummary",
 							"type": "String"
 						},
 						"DestinationTable": {
@@ -179,7 +179,7 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "CopytoVendorSummary",
+							"value": "Copy to VendorSummary",
 							"type": "String"
 						},
 						"DestinationTable": {
