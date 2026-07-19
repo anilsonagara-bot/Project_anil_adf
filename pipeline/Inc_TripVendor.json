@@ -105,6 +105,81 @@
 							},
 							"path": "incrementalload/logging/TripVendor"
 						}
+					},
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "medallion",
+									"type": "String"
+								},
+								"sink": {
+									"name": "medallion",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "hack_license",
+									"type": "String"
+								},
+								"sink": {
+									"name": "hack_license",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "Vendor_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "Vendor_id",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "rate_code",
+									"type": "Byte"
+								},
+								"sink": {
+									"name": "rate_code",
+									"type": "Byte"
+								}
+							},
+							{
+								"source": {
+									"name": "store_and_fwd_flag",
+									"type": "String"
+								},
+								"sink": {
+									"name": "store_and_fwd_flag",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "CreatedDate",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "CreatedDate",
+									"type": "DateTime"
+								}
+							},
+							{
+								"source": {
+									"name": "LastUpdated",
+									"type": "DateTime"
+								},
+								"sink": {
+									"name": "LastUpdated",
+									"type": "DateTime"
+								}
+							}
+						]
 					}
 				},
 				"inputs": [
