@@ -28,7 +28,28 @@
 						"sqlWriterUseTableLock": false,
 						"disableMetricsCollection": false
 					},
-					"enableStaging": false,
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "Staging",
+							"type": "LinkedServiceReference"
+						},
+						"path": "aggregation/staging/Agg_FareDetails"
+					},
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Info",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "Logging",
+								"type": "LinkedServiceReference"
+							},
+							"path": "aggregation/logging/Agg_FareDetails"
+						}
+					},
 					"translator": {
 						"type": "TabularTranslator",
 						"typeConversion": true,
