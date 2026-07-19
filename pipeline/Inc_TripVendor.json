@@ -84,7 +84,28 @@
 						"allowCopyCommand": true,
 						"disableMetricsCollection": false
 					},
-					"enableStaging": false
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "Staging",
+							"type": "LinkedServiceReference"
+						},
+						"path": "incrementalload/staging/TripVendor"
+					},
+					"logSettings": {
+						"enableCopyActivityLog": true,
+						"copyActivityLogSettings": {
+							"logLevel": "Warning",
+							"enableReliableLogging": false
+						},
+						"logLocationSettings": {
+							"linkedServiceName": {
+								"referenceName": "Logging",
+								"type": "LinkedServiceReference"
+							},
+							"path": "incrementalload/logging/TripVendor"
+						}
+					}
 				},
 				"inputs": [
 					{
