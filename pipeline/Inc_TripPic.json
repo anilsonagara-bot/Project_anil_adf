@@ -217,7 +217,7 @@
 				]
 			},
 			{
-				"name": "UpsertTripVendor",
+				"name": "UpsertTripPic",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
@@ -264,7 +264,7 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "UpsertTripVendor",
+						"activity": "UpsertTripPic",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -355,7 +355,7 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "UpsertTripVendor",
+						"activity": "UpsertTripPic",
 						"dependencyConditions": [
 							"Failed"
 						]
