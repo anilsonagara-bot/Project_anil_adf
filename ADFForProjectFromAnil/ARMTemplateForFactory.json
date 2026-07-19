@@ -2949,6 +2949,12 @@
 								"dependencyConditions": [
 									"Succeeded"
 								]
+							},
+							{
+								"activity": "LookupOldWatermark",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
 						"policy": {
@@ -2968,9 +2974,14 @@
 							},
 							"sink": {
 								"type": "SqlDWSink",
-								"preCopyScript": "TRUNCATE TABLE stg_TripVendor",
-								"allowCopyCommand": true,
-								"copyCommandSettings": {},
+								"writeBehavior": "Upsert",
+								"upsertSettings": {
+									"keys": [
+										"medallion"
+									],
+									"interimSchemaName": ""
+								},
+								"sqlWriterUseTableLock": false,
 								"disableMetricsCollection": false
 							},
 							"enableStaging": true,
@@ -3001,74 +3012,93 @@
 									{
 										"source": {
 											"name": "medallion",
-											"type": "String"
+											"type": "String",
+											"physicalType": "char"
 										},
 										"sink": {
 											"name": "medallion",
-											"type": "String"
+											"type": "String",
+											"physicalType": "char"
 										}
 									},
 									{
 										"source": {
 											"name": "hack_license",
-											"type": "String"
+											"type": "String",
+											"physicalType": "char"
 										},
 										"sink": {
 											"name": "hack_license",
-											"type": "String"
+											"type": "String",
+											"physicalType": "char"
 										}
 									},
 									{
 										"source": {
 											"name": "Vendor_id",
-											"type": "String"
+											"type": "String",
+											"physicalType": "varchar"
 										},
 										"sink": {
 											"name": "Vendor_id",
-											"type": "String"
+											"type": "String",
+											"physicalType": "varchar"
 										}
 									},
 									{
 										"source": {
 											"name": "rate_code",
-											"type": "Byte"
+											"type": "Byte",
+											"physicalType": "tinyint"
 										},
 										"sink": {
 											"name": "rate_code",
-											"type": "Byte"
+											"type": "Byte",
+											"physicalType": "tinyint"
 										}
 									},
 									{
 										"source": {
 											"name": "store_and_fwd_flag",
-											"type": "String"
+											"type": "String",
+											"physicalType": "char"
 										},
 										"sink": {
 											"name": "store_and_fwd_flag",
-											"type": "String"
+											"type": "String",
+											"physicalType": "char"
 										}
 									},
 									{
 										"source": {
 											"name": "CreatedDate",
-											"type": "DateTime"
+											"type": "DateTime",
+											"physicalType": "datetime"
 										},
 										"sink": {
 											"name": "CreatedDate",
-											"type": "DateTime"
+											"type": "DateTime",
+											"physicalType": "datetime"
 										}
 									},
 									{
 										"source": {
 											"name": "LastUpdated",
-											"type": "DateTime"
+											"type": "DateTime",
+											"physicalType": "datetime"
 										},
 										"sink": {
 											"name": "LastUpdated",
-											"type": "DateTime"
+											"type": "DateTime",
+											"physicalType": "datetime"
 										}
 									}
-								]
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
 							}
 						},
 						"inputs": [
@@ -3080,7 +3110,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "Stage_vendor",
+								"referenceName": "TripVendor_dest",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -3106,7 +3136,7 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"storedProcedureName": "[[dbo].[usp_UpsertTripVendor]",
+							"storedProcedureName": "[[dbo].[usp_UpdateWatermark]",
 							"storedProcedureParameters": {
 								"NewWatermark": {
 									"value": {
@@ -3114,6 +3144,192 @@
 										"type": "Expression"
 									},
 									"type": "DateTime"
+								},
+								"TableName": {
+									"value": {
+										"value": "TripVendor",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "DedicatedPoolForProject",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Success",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "UpsertTripVendor",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_LogPipelineRun]",
+							"storedProcedureParameters": {
+								"ActivityName": {
+									"value": "Copy Incremental Trip Vendor",
+									"type": "String"
+								},
+								"DestinationTable": {
+									"value": "TripVendor",
+									"type": "String"
+								},
+								"EndTime": {
+									"value": "@utcnow()",
+									"type": "DateTime"
+								},
+								"ErrorMessage": {
+									"value": {
+										"value": "''",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineName": {
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineRunId": {
+									"value": "@pipeline().RunId",
+									"type": "String"
+								},
+								"RowsCopied": {
+									"value": {
+										"value": "@activity('CopyIncrementalTripVendor').output.rowsCopied",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"RowsRead": {
+									"value": {
+										"value": "@activity('CopyIncrementalTripVendor').output.rowsRead",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"SourceTable": {
+									"value": {
+										"value": "TripVendor",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"StartTime": {
+									"value": {
+										"value": "@activity('CopyIncrementalTripVendor').output.executionDetails[0].start",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"Status": {
+									"value": "Succeeded",
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "DedicatedPoolForProject",
+							"type": "LinkedServiceReference"
+						}
+					},
+					{
+						"name": "Fail",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [
+							{
+								"activity": "UpsertTripVendor",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_LogPipelineRun]",
+							"storedProcedureParameters": {
+								"ActivityName": {
+									"value": "Copy Incremental Trip Vendor",
+									"type": "String"
+								},
+								"DestinationTable": {
+									"value": "TripVendor",
+									"type": "String"
+								},
+								"EndTime": {
+									"value": "@utcnow()",
+									"type": "DateTime"
+								},
+								"ErrorMessage": {
+									"value": {
+										"value": "@activity('CopyIncrementalTripVendor').error.message",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineName": {
+									"value": {
+										"value": "@pipeline().Pipeline",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"PipelineRunId": {
+									"value": "@pipeline().RunId",
+									"type": "String"
+								},
+								"RowsCopied": {
+									"value": {
+										"value": "@activity('CopyIncrementalTripVendor').output.rowsCopied",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"RowsRead": {
+									"value": {
+										"value": "@activity('CopyIncrementalTripVendor').output.rowsRead",
+										"type": "Expression"
+									},
+									"type": "Int32"
+								},
+								"SourceTable": {
+									"value": "TripVendor",
+									"type": "String"
+								},
+								"StartTime": {
+									"value": {
+										"value": "@activity('CopyIncrementalTripVendor').output.executionDetails[0].start",
+										"type": "Expression"
+									},
+									"type": "DateTime"
+								},
+								"Status": {
+									"value": "Failed",
+									"type": "String"
 								}
 							}
 						},
@@ -3131,7 +3347,7 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/LookupOldWatermark')]",
 				"[concat(variables('factoryId'), '/datasets/LookupNewWatermark1')]",
-				"[concat(variables('factoryId'), '/datasets/Stage_vendor')]",
+				"[concat(variables('factoryId'), '/datasets/TripVendor_dest')]",
 				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]",
 				"[concat(variables('factoryId'), '/linkedServices/Staging')]",
 				"[concat(variables('factoryId'), '/linkedServices/Logging')]"
@@ -3276,6 +3492,61 @@
 				"typeProperties": {
 					"schema": "dbo",
 					"table": "stg_TripVendor"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/DedicatedPoolForProject')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TripVendor_dest')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "DedicatedPoolForProject",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "medallion",
+						"type": "char"
+					},
+					{
+						"name": "hack_license",
+						"type": "char"
+					},
+					{
+						"name": "Vendor_id",
+						"type": "varchar"
+					},
+					{
+						"name": "rate_code",
+						"type": "tinyint",
+						"precision": 3
+					},
+					{
+						"name": "store_and_fwd_flag",
+						"type": "char"
+					},
+					{
+						"name": "CreatedDate",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					},
+					{
+						"name": "LastUpdated",
+						"type": "datetime",
+						"precision": 23,
+						"scale": 3
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "TripVendor"
 				}
 			},
 			"dependsOn": [
