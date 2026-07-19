@@ -100,7 +100,7 @@
 							"type": "DateTime"
 						},
 						"ErrorMessage": {
-							"value": "''",
+							"value": "@activity('VendorSummary').error.message",
 							"type": "String"
 						},
 						"PipelineName": {
@@ -206,7 +206,7 @@
 							"type": "String"
 						},
 						"RowsCopied": {
-							"value": "0",
+							"value": "@activity('VendorSummary').output.rowsCopied",
 							"type": "Int32"
 						},
 						"RowsRead": {
