@@ -17,7 +17,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlDWSource",
-						"sqlReaderQuery": "SELECT LastLoadedValue FROM WatermarkControl WHERE TableName = 'TripVendor'",
+						"sqlReaderQuery": "SELECT LastLoadedValue FROM WatermarkControl WHERE TableName = 'Payment'",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -42,7 +42,7 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT MAX(LastUpdated) AS NewWatermark FROM TripVendor",
+						"sqlReaderQuery": "SELECT MAX(LastUpdated) AS NewWatermark FROM Payment",
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -53,7 +53,7 @@
 				}
 			},
 			{
-				"name": "CopyIncrementalTripVendor",
+				"name": "CopyIncrementalPayment",
 				"type": "Copy",
 				"dependsOn": [
 					{
@@ -80,7 +80,10 @@
 				"typeProperties": {
 					"source": {
 						"type": "SqlServerSource",
-						"sqlReaderQuery": "SELECT * FROM TripVendor\nWHERE LastUpdated > '@{activity('LookupOldWatermark').output.firstRow.LastLoadedValue}'\nAND LastUpdated <= '@{activity('LookupNewWatermark').output.firstRow.NewWatermark}'",
+						"sqlReaderQuery": {
+							"value": "SELECT * FROM Payment\nWHERE LastUpdated > '@{activity('LookupOldWatermark').output.firstRow.LastLoadedValue}'\nAND LastUpdated <= '@{activity('LookupNewWatermark').output.firstRow.NewWatermark}'",
+							"type": "Expression"
+						},
 						"queryTimeout": "02:00:00",
 						"partitionOption": "None"
 					},
@@ -89,7 +92,7 @@
 						"writeBehavior": "Upsert",
 						"upsertSettings": {
 							"keys": [
-								"medallion"
+								"id"
 							],
 							"interimSchemaName": ""
 						},
@@ -102,7 +105,7 @@
 							"referenceName": "Staging",
 							"type": "LinkedServiceReference"
 						},
-						"path": "incrementalload/staging/TripVendor"
+						"path": "incrementalload/staging/Payment"
 					},
 					"logSettings": {
 						"enableCopyActivityLog": true,
@@ -115,7 +118,7 @@
 								"referenceName": "Logging",
 								"type": "LinkedServiceReference"
 							},
-							"path": "incrementalload/logging/TripVendor"
+							"path": "incrementalload/logging/Payment"
 						}
 					},
 					"translator": {
@@ -123,6 +126,18 @@
 						"mappings": [
 							{
 								"source": {
+									"name": "id",
+									"type": "Int32",
+									"physicalType": "int"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int32",
+									"physicalType": "int"
+								}
+							},
+							{
+								"source": {
 									"name": "medallion",
 									"type": "String",
 									"physicalType": "char"
@@ -135,50 +150,30 @@
 							},
 							{
 								"source": {
-									"name": "hack_license",
-									"type": "String",
-									"physicalType": "char"
-								},
-								"sink": {
-									"name": "hack_license",
-									"type": "String",
-									"physicalType": "char"
-								}
-							},
-							{
-								"source": {
-									"name": "Vendor_id",
+									"name": "payment_type",
 									"type": "String",
 									"physicalType": "varchar"
 								},
 								"sink": {
-									"name": "Vendor_id",
+									"name": "payment_type",
 									"type": "String",
 									"physicalType": "varchar"
 								}
 							},
 							{
 								"source": {
-									"name": "rate_code",
-									"type": "Byte",
-									"physicalType": "tinyint"
+									"name": "total_amount",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 8
 								},
 								"sink": {
-									"name": "rate_code",
-									"type": "Byte",
-									"physicalType": "tinyint"
-								}
-							},
-							{
-								"source": {
-									"name": "store_and_fwd_flag",
-									"type": "String",
-									"physicalType": "char"
-								},
-								"sink": {
-									"name": "store_and_fwd_flag",
-									"type": "String",
-									"physicalType": "char"
+									"name": "total_amount",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 8
 								}
 							},
 							{
@@ -221,17 +216,17 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "TripVendor_dest",
+						"referenceName": "Payment_Dest",
 						"type": "DatasetReference"
 					}
 				]
 			},
 			{
-				"name": "UpsertTripVendor",
+				"name": "UpsertPayment",
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "CopyIncrementalTripVendor",
+						"activity": "CopyIncrementalPayment",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -257,7 +252,7 @@
 						},
 						"TableName": {
 							"value": {
-								"value": "TripVendor",
+								"value": "Payment",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -274,7 +269,7 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "UpsertTripVendor",
+						"activity": "UpsertPayment",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -292,11 +287,11 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "Copy Incremental Trip Vendor",
+							"value": "Copy Incremental Payment",
 							"type": "String"
 						},
 						"DestinationTable": {
-							"value": "TripVendor",
+							"value": "Payment",
 							"type": "String"
 						},
 						"EndTime": {
@@ -323,28 +318,28 @@
 						},
 						"RowsCopied": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.rowsCopied",
+								"value": "@activity('CopyIncrementalPayment').output.rowsCopied",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"RowsRead": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.rowsRead",
+								"value": "@activity('CopyIncrementalPayment').output.rowsRead",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"SourceTable": {
 							"value": {
-								"value": "TripVendor",
+								"value": "Payment",
 								"type": "Expression"
 							},
 							"type": "String"
 						},
 						"StartTime": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.executionDetails[0].start",
+								"value": "@activity('CopyIncrementalPayment').output.executionDetails[0].start",
 								"type": "Expression"
 							},
 							"type": "DateTime"
@@ -365,7 +360,7 @@
 				"type": "SqlServerStoredProcedure",
 				"dependsOn": [
 					{
-						"activity": "UpsertTripVendor",
+						"activity": "UpsertPayment",
 						"dependencyConditions": [
 							"Failed"
 						]
@@ -383,11 +378,11 @@
 					"storedProcedureName": "[dbo].[usp_LogPipelineRun]",
 					"storedProcedureParameters": {
 						"ActivityName": {
-							"value": "Copy Incremental Trip Vendor",
+							"value": "Copy Incremental Payment",
 							"type": "String"
 						},
 						"DestinationTable": {
-							"value": "TripVendor",
+							"value": "Payment",
 							"type": "String"
 						},
 						"EndTime": {
@@ -396,7 +391,7 @@
 						},
 						"ErrorMessage": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').error.message",
+								"value": "@activity('CopyIncrementalPayment').error.message",
 								"type": "Expression"
 							},
 							"type": "String"
@@ -414,25 +409,25 @@
 						},
 						"RowsCopied": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.rowsCopied",
+								"value": "@activity('CopyIncrementalPayment').output.rowsCopied",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"RowsRead": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.rowsRead",
+								"value": "@activity('CopyIncrementalPayment').output.rowsRead",
 								"type": "Expression"
 							},
 							"type": "Int32"
 						},
 						"SourceTable": {
-							"value": "TripVendor",
+							"value": "Payment",
 							"type": "String"
 						},
 						"StartTime": {
 							"value": {
-								"value": "@activity('CopyIncrementalTripVendor').output.executionDetails[0].start",
+								"value": "@activity('CopyIncrementalPayment').output.executionDetails[0].start",
 								"type": "Expression"
 							},
 							"type": "DateTime"
